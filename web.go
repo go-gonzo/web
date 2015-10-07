@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/go-gonzo/web/internal/http"
+	"net/http"
 
 	"github.com/omeid/gonzo"
 	"github.com/omeid/gonzo/context"
@@ -12,7 +12,7 @@ import (
 func Get(ctx context.Context, urls ...string) gonzo.Pipe {
 
 	out := make(chan gonzo.File)
-
+	client := &http.Client{}
 	go func() {
 		defer close(out)
 
@@ -25,7 +25,7 @@ func Get(ctx context.Context, urls ...string) gonzo.Pipe {
 			default:
 				ctx.Infof("Downloading %s", url)
 
-				file, err := http.Get(url)
+				file, err := get(ctx, client, url)
 				if err != nil {
 					ctx.Error(err)
 					break

@@ -11,6 +11,7 @@ import (
 // It reports the progress to the Context using a ReadProgress proxy.
 func Get(ctx context.Context, urls ...string) gonzo.Pipe {
 
+	ctx, cancel := context.WithCancel(ctx)
 	out := make(chan gonzo.File)
 	client := &http.Client{}
 	go func() {
@@ -18,6 +19,11 @@ func Get(ctx context.Context, urls ...string) gonzo.Pipe {
 
 		for _, url := range urls {
 
+			if url == "" {
+				ctx.Error("Empty URL.")
+				cancel()
+				return
+			}
 			select {
 			case <-ctx.Done():
 				ctx.Warn(context.Canceled)
@@ -28,6 +34,7 @@ func Get(ctx context.Context, urls ...string) gonzo.Pipe {
 				file, err := get(ctx, client, url)
 				if err != nil {
 					ctx.Error(err)
+					cancel()
 					break
 				}
 

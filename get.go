@@ -6,15 +6,22 @@ import (
 	"net/http"
 	"path"
 
-	"golang.org/x/net/context"
-	"golang.org/x/net/context/ctxhttp"
+	"context"
 
 	"github.com/omeid/gonzo"
 )
 
 func get(ctx context.Context, client *http.Client, url string) (gonzo.File, error) {
 
-	resp, err := ctxhttp.Get(ctx, client, url)
+	req, err := http.NewRequest("GET", url, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req = req.WithContext(ctx)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
